@@ -1,0 +1,13 @@
+spring:
+  profiles:
+    active: dev
+
+
+
+#spring:
+#  application:
+#    name: spring-ai-demo
+#  ai:
+#    dashscope:
+#      api-key: "xxx"
+

@@ -1,0 +1,22 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: spring-ai-demo
+  ai:
+    dashscope:
+      api-key: "sk-a9010bab9b754370a9e9953fb7570ee6"
+
+knife4j:
+  enable: true
+  openapi:
+    title: "Spring AI Demo"
+    version: 1.0
+    group:
+      default:
+        api-rule: package
+        api-rule-resources:
+          - com.atg.spring_ai.controller
