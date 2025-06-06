@@ -4,20 +4,22 @@ package com.atg.spring_ai.controller;
 import cn.hutool.core.util.StrUtil;
 import com.atg.spring_ai.common.BaseResponse;
 import com.atg.spring_ai.common.ResultUtils;
+import com.atg.spring_ai.exception.BusinessException;
+import com.atg.spring_ai.exception.ErrorCode;
+import com.atg.spring_ai.model.dto.ImageRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.ai.image.ImageModel;
-import org.springframework.ai.image.ImagePrompt;
-import org.springframework.ai.image.ImageResponse;
+import org.springframework.ai.image.*;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /*
 author: atg
@@ -43,7 +45,7 @@ public class DashScopeImageController {
     @GetMapping("/generateImage")
     public BaseResponse<String> generateImage() {
         ImagePrompt prompt = new ImagePrompt(PROMOTE);
-        ImageResponse imageResponse = imageModel.call(prompt); // 可能返回一个任务 ID
+        ImageResponse imageResponse = imageModel.call(prompt);
         String imageUrl = imageResponse.getResult().getOutput().getUrl();
 
         if (StrUtil.isEmpty(imageUrl)) {
@@ -74,6 +76,34 @@ public class DashScopeImageController {
         } catch (IOException e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    /**
+     * 返回生成多张图片URL
+     * @param imageRequest
+     * @return
+     */
+    @PostMapping("/generate/multiImage")
+    public BaseResponse<Set<String>> generateMultiImage(@RequestBody ImageRequest imageRequest) {
+        String imagePrompt = imageRequest.getImagePrompt();
+        int imageCount = imageRequest.getImageCount();
+
+        if (imageCount < 1 || imageCount > 10) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        if (imagePrompt != null && StrUtil.isBlank(imagePrompt)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,  "请输入图片描述提示词");
+        }
+
+        ImageOptions imageOptions = ImageOptionsBuilder.builder().N(imageCount).build();
+//       # ImagePrompt 传递参数是 -- String 类型和 -- ImageOptions 类型
+        ImagePrompt result = new ImagePrompt(imagePrompt, imageOptions);
+        ImageResponse imageResponse = imageModel.call(result);
+        Set<String> collect = imageResponse.getResults().
+                stream().map(res -> res.getOutput().getUrl())
+                .collect(Collectors.toSet());
+        return ResultUtils.success(collect);
+
     }
 }
 
