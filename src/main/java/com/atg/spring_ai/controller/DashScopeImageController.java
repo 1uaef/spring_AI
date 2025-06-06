@@ -53,6 +53,7 @@ public class DashScopeImageController {
         return ResultUtils.success(imageUrl);
     }
 
+
     /**
      * 返回显示图片
      * @param response
