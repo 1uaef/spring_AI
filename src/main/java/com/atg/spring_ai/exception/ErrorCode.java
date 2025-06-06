@@ -1,10 +1,13 @@
 package com.atg.spring_ai.exception;
 
 
+import lombok.Getter;
+
 /*
 author: atg
 time: 2025/6/4 20:34
 */
+@Getter
 public enum ErrorCode {
     SUCCESS(0, "ok"),
     PARAMS_ERROR(40000, "请求参数错误"),
